@@ -1,22 +1,49 @@
+.diet-plan-container {
+  width: 80%;
+}
+
 .diet-plan {
   font-family: Arial, sans-serif;
   margin: 20px;
   padding: 20px;
-  border: 1px solid #ccc;
   border-radius: 8px;
-  background-color: #f9f9f9;
+  background-color: #1f1f1f;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.diet-plan h2 {
+  font-size: 3rem;
+  color: white;
+}
+
+.diet-plan .total-calories{
+  font-size: 1.5rem;
 }
 
 .meals {
   margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 20px;
 }
 
 .meal {
-  margin-bottom: 20px;
-  padding: 10px;
-  border: 1px solid #ddd;
+  padding: 1rem;
   border-radius: 5px;
-  background-color: #fff;
+  background-color: #000000;
+  border-radius: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.meal-items{
+  width: 80%;
+  margin-top: 20px;
 }
 
 .meal-items ul {

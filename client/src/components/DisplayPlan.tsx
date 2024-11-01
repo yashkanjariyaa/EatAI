@@ -1,11 +1,9 @@
 import "./DisplayPlan.css";
-import React, { useRef } from "react";
-import GoBackButton from "./buttons/GoBack";
-import HomeButton from "./buttons/Home";
+import React, { useEffect, useRef, useState } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import axios from "axios";
 
-// Define types for the meal and diet plan structure
 interface Meal {
   name: string;
   items: string[];
@@ -17,16 +15,35 @@ interface DietPlanProps {
   total_calories: number;
 }
 
-// DietPlan component
-const DietPlan: React.FC<{ dietPlan: DietPlanProps }> = ({ dietPlan }) => {
+const DietPlan: React.FC = () => {
+  const [dietPlan, setDietPlan] = useState<DietPlanProps | null>(null);
   const componentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const savedDietPlan = localStorage.getItem("dietPlan");
+    console.log("Diet Plan from localStorage:", savedDietPlan);
+    if (savedDietPlan) {
+      const parsedPlan = JSON.parse(savedDietPlan);
+
+      const formattedPlan: DietPlanProps = {
+        total_calories: Number(parsedPlan.total_calories),
+        meals: parsedPlan.meals.map((meal: any) => ({
+          name: meal.name,
+          items: meal.dishes,
+          calories: meal.calories,
+        })),
+      };
+
+      setDietPlan(formattedPlan);
+    }
+  }, []);
 
   const handleDownloadPDF = () => {
     if (componentRef.current) {
       html2canvas(componentRef.current).then((canvas) => {
         const pdf = new jsPDF();
         const imgData = canvas.toDataURL("image/png");
-        const imgWidth = 190; // Adjust based on your layout
+        const imgWidth = 190;
         const pageHeight = pdf.internal.pageSize.height;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
         let heightLeft = imgHeight;
@@ -48,14 +65,24 @@ const DietPlan: React.FC<{ dietPlan: DietPlanProps }> = ({ dietPlan }) => {
     }
   };
 
+  const fetchRecipe = async (item: string) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:5000/get-recipe?dish_name=${encodeURIComponent(item)}`
+      );
+      localStorage.setItem("recipe", JSON.stringify(response.data));
+      window.location.href = "/recipes";
+    } catch (error) {
+      console.error("Failed to fetch recipe:", error);
+    }
+  };
+
   if (!dietPlan || !dietPlan.meals) {
     return <div>No diet plan available.</div>;
   }
 
   return (
-    <div>
-      <GoBackButton />
-      <HomeButton />
+    <div className="diet-plan-container">
       <div className="diet-plan" ref={componentRef}>
         <h2>Daily Diet Plan</h2>
         <div className="total-calories">
@@ -66,16 +93,27 @@ const DietPlan: React.FC<{ dietPlan: DietPlanProps }> = ({ dietPlan }) => {
           {dietPlan.meals.map((meal, index) => (
             <div key={index} className="meal">
               <h3>{meal.name}</h3>
+              <div className="meal-calories">
+                <strong>Calories:</strong> {meal.calories}
+              </div>
               <div className="meal-items">
                 <strong>Items:</strong>
                 <ul>
                   {meal.items.map((item, i) => (
-                    <li key={i}>{item}</li>
+                    <li key={i} className="meal-item">
+                      <span
+                        onClick={() => fetchRecipe(item)}
+                        className="fetch-recipe-link"
+                        style={{
+                          cursor: "pointer",
+                          textDecoration: "underline",
+                        }}
+                      >
+                        {item}
+                      </span>
+                    </li>
                   ))}
                 </ul>
-              </div>
-              <div className="meal-calories">
-                <strong>Calories:</strong> {meal.calories}
               </div>
             </div>
           ))}

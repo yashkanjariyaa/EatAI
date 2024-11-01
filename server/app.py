@@ -22,7 +22,6 @@ llm = ChatGoogleGenerativeAI(
 
 @app.route('/diet_plan', methods=['GET'])
 def get_diet_plan():
-    # Extract parameters
     name = request.args.get('name', type=str)
     age = request.args.get('age', type=int)
     gender = request.args.get('gender', type=str)
@@ -41,55 +40,149 @@ def get_diet_plan():
     additional_notes = request.args.get('additional_notes', default='I need a tasty diet.', type=str)
     allergies = request.args.getlist('allergies', type=str)
 
-    # Construct request string
     request_string = (
-        f"My name is {name}, a {age}-year-old {gender}. My health goal is {health_goals}. "
+        f"My name is {name}, a {age}-year-old {gender}. I follow a strictly {dietary_preferences} diet. My health goal is {health_goals}. "
         f"I have a medical history of {', '.join(medical_history) if medical_history else 'no specific conditions'}. "
         f"My current weight is {weight} kg, height is {height} cm, and body fat percentage is "
         f"{body_fat_percentage if body_fat_percentage else "not specified."}%." 
-        f"My activity level is {activity_level}, and I follow a {dietary_preferences} diet. "
+        f"My activity level is {activity_level} "
         f"I prefer {meal_frequency} meals a day and have a {budget} budget. I drink about {hydration} L of water daily, "
         f"and I currently take supplements: {', '.join(supplements) if supplements else 'none'}. "
         f"My preferred meal timing is {meal_timing}. Additional notes: {additional_notes}."
         f"I have allergies to {', '.join(allergies) if allergies else 'none'}." if allergies else "not specified."
     )
 
-    # Dynamically create meal sections based on meal frequency
     meal_sections = ""
     for i in range(meal_frequency):
         meal_name = "Breakfast" if i == 0 else "Lunch" if i == 1 else "Dinner" if i == 2 else f"Meal {i+1}"
         meal_sections += (
             f"Meal {{\n"
             f"    name: \"{meal_name}\",\n"
-            f"    items: [\"item1\", \"item2\", ...],\n"
+            f"    dishes: [\"dish1\", \"dish2\", ...],\n"
             f"    calories: _\n"
             f"}},\n"
         )
 
-    # Prompt with dynamic meal sections
     message = f"""You are a Diet Assist AI that helps users create an Indian diet plan according to the user's information
     
     User's Information : {request_string}
     
     Return the diet plan in a structured format as defined below, include no additional data or information:
 
-    DailyDietPlan {{
+    {{
         meals: [
             {meal_sections}
         ],
-        total_calories: (sum of calories of all meals),
+        total_calories: "sum of calories of all meals",
     }}
 
     """
 
-    # Invoke AI model
+    ai_msg = llm.invoke(message)
+    
+    try: 
+        content = ai_msg.content.strip()
+        if content.startswith("```json"):
+            content = content[7:-3].strip()
+        return jsonify(json.loads(content))
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+    
+@app.route('/get-recipe', methods=['GET'])
+def get_recipe():
+    dish_name = request.args.get('dish_name', type=str)
+
+    message = f"""You are a Recipe Assist AI that provides a detailed recipe structure for an Indian dish.
+    
+    The dish name provided is: {dish_name}.
+    
+    Return the recipe in a structured format as defined below, include no additional data or information:
+
+    {{
+        name: "{dish_name}",
+        ingredients: [
+            {{name: "ingredient1", quantity: "amount1"}},
+            {{name: "ingredient2", quantity: "amount2"}},
+            ...
+        ],
+        instructions: [
+            "Step 1",
+            "Step 2",
+            ...
+        ],
+        prep_time: "time required for preparation",
+        cook_time: "time required for cooking",
+        total_time: "total time needed",
+        servings: number_of_servings,
+        calories: total_calories
+    }}
+    """
+
     ai_msg = llm.invoke(message)
     
     try:
-        # Return the response from AI in JSON format
-        return jsonify(json.loads(ai_msg.content[7:-3].strip()))
+        content = ai_msg.content.strip()
+        if content.startswith("```json"):
+            content = content[7:-3].strip()
+        return jsonify(json.loads(content))
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+
+@app.route('/get-ingredient-info', methods=['GET'])
+def get_ingredient_info():
+    ingredient_name = request.args.get('ingredient_name', type=str)
+
+    message = f"""You are a Nutrition Assist AI that provides detailed information about a specific ingredient in the context of a diet plan based on Indian dishes.
+    
+    The ingredient provided is: {ingredient_name}.
+    
+    Return the information in a structured format as defined below, including no additional data or information:
+
+    {{
+        name: "{ingredient_name}",
+        calories: "total calorie content per 100g",
+        macronutrients: {{
+            carbs: "amount of carbohydrates per 100g",
+            proteins: "amount of proteins per 100g",
+            fats: "amount of fats per 100g",
+        }},
+        micronutrients: [
+            {{name: "Vitamin A", amount: "amount per 100g"}},
+            {{name: "Vitamin C", amount: "amount per 100g"}},
+            ...
+        ],
+        availability: "availability in local markets or supermarkets",
+        dietary_restrictions: [
+            "restriction 1",
+            "restriction 2",
+            ...
+        ],
+        health_benefits: [
+            "benefit 1",
+            "benefit 2",
+            ...
+        ],
+        suitable_for_diets: [
+            "diet type 1",
+            "diet type 2",
+            ...
+        ]
+    }}
+    """
+
+    ai_msg = llm.invoke(message)
+    
+    try:
+        content = ai_msg.content.strip()
+        if content.startswith("```json"):
+            content = content[7:-3].strip()
+        return jsonify(json.loads(content))
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    
 
 if __name__ == '__main__':
     app.run(debug=True)

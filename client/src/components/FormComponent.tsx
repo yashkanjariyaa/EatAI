@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
 import "./DietPlanForm.css";
-import { useNavigate } from "react-router-dom";
 const questions = [
   {
     label: "What shall I call you?",
@@ -136,8 +135,6 @@ const DietPlanForm: React.FC = () => {
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
-  const navigate = useNavigate();
-
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -177,7 +174,6 @@ const DietPlanForm: React.FC = () => {
       });
       console.log(response.data);
       localStorage.setItem("dietPlan", JSON.stringify(response.data));
-      navigate("/result");
     } catch (error) {
       console.error("Error fetching diet plan:", error);
     }
