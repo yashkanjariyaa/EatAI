@@ -114,3 +114,13 @@
   width: 45%;
   margin: 1rem;
 }
+
+.ingredient-info-dropdown{
+  height: 30vh;
+  width: 30vw;
+  overflow-y: scroll;
+  z-index: 1;
+  position: absolute;
+  background: #1f1f1f;
+  padding: 1rem;
+}
