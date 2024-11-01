@@ -1,0 +1,214 @@
+/* Home.css */
+
+.container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  color: #fff;
+}
+
+.left-container {
+  width: 50vw;
+  height: 100vh;
+  background: url("../assets/images/eb4dd35a9a4f9e6543134aa325eb9ef9.jpg");
+  color: rgb(255, 255, 255);
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.left-container .info {
+  backdrop-filter: blur(10px);
+  height: 25vh;
+  display: flex;
+  align-items: start;
+  justify-content: center;
+  flex-direction: column;
+  padding: 2.5rem;
+  font-size: 1.5rem;
+  color: rgba(255, 255, 255, 0.531);
+  border-radius: 2rem;
+  border: 1px solid #ccc;
+}
+
+.left-container .icons {
+  font-size: 3rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  width: 50%;
+  margin-top: 2rem;
+  color: #fff;
+}
+
+.left-container .credits a{
+  color: #fff;
+}
+
+.right-container {
+  width: 50vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  padding: 5rem 0;
+  box-sizing: border-box;
+}
+
+.right-container .cta {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: end;
+  width: 75%;
+}
+.right-container .cta button {
+  border-radius: 3rem;
+  background-color: #ccc;
+  color: #000000;
+  padding: 10px 20px;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+.right-container .bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  justify-content: space-between;
+  height: 80%;
+  width: 90%;
+  padding: 0 5rem;
+}
+.right-container h1 {
+  font-size: 4rem;
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+}
+.right-container h1 img {
+  width: 70px;
+  height: 70px;
+  margin: 0 1rem;
+}
+.right-container .description {
+  display: flex;
+  flex-direction: column;
+}
+.right-container .primary-description {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+.right-container .secondary-description {
+  font-size: 1.2rem;
+  color: #ccc;
+}
+.right-container .keywords {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap; /* Enable wrapping */
+  justify-content: start;
+  align-items: center;
+  margin: 2rem 0;
+  width: 55%;
+}
+.right-container .keywords div {
+  border: 1px solid #fff;
+  border-radius: 3rem;
+  background-color: transparent;
+  color: #ccc;
+  padding: 10px 20px;
+  font-size: 1.2rem;
+  margin: 5px 0;
+}
+.right-container .keywords div:nth-child(1) {
+  background-color: #df480c;
+  color: #fff;
+}
+.right-container .keywords div:nth-child(2) {
+  background-color: #29ce7e;
+    color: #fff;
+}
+.content {
+  display: flex;
+  padding: 10px;
+  border-radius: 5px;
+  width: 85%;
+  height: max-content;
+  justify-content: space-between;
+  flex-direction: column;
+  align-items: start;
+  margin-bottom: 6rem;
+}
+.input-container {
+  border: 2px solid #ccc;
+  width: 75%;
+  border-radius: 2rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+.input-container .icon {
+  margin: 0 1rem;
+  font-size: 2rem;
+}
+.input-prompt {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: transparent;
+  color: #fff;
+  border-radius: 2rem;
+  font-size: 1.5rem;
+  border: unset;
+  width: 90%;
+}
+.input-prompt:hover {
+  border: unset;
+}
+.input-prompt:active {
+  border: unset;
+}
+.input-prompt:focus-visible {
+  border: unset;
+}
+.input-prompt:focus {
+  border: unset;
+}
+.gradient-text {
+  background: linear-gradient(
+    90deg,
+    #29ce7e,
+    #df480c,
+    #ffffff,
+    #29ce7e,
+    #df480c
+  );
+  background-size: 500%; /* Increase size for a smoother transition */
+  background-clip: text;
+  color: transparent;
+  animation: gradient-animation 6s infinite linear;
+  -webkit-background-clip: text; /* Safari compatibility */
+}
+
+/* Gradient animation keyframes */
+@keyframes gradient-animation {
+  0% {
+    background-position: 0% 50%;
+  }
+  25% {
+    background-position: 50% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  75% {
+    background-position: 150% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}

@@ -1,0 +1,61 @@
+.recipe-container {
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.recipe-container h1 {
+  font-size: 3rem;
+}
+
+.recommendations-container .title {
+  font-size: 1.5rem;
+}
+
+.recommendations-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  height: 40vh;
+}
+
+.recommendations {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+  height: 60%;
+}
+
+.recommendations .recommendation {
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  width: 30%;
+  background: #1f1f1f;
+  padding: 1.5rem 2rem;
+  border-radius: 2rem;
+  font-size: 1.2rem;
+  height: 100%;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.recommendations .recommendation .title {
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #ccc;
+}
+
+.recommendations .recommendation:hover {
+  border: 2px solid white;
+}
+
+.recommendations .recommendation .description {
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  justify-content: space-between;
+  height: 70%;
+}
