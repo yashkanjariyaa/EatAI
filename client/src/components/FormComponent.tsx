@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import "./DietPlanForm.css";
 import LoadingModal from "../modal/LoadingModal";
+import { useNavigate } from "react-router-dom";
 
 const questions = [
   {
@@ -142,6 +143,8 @@ const DietPlanForm: React.FC<DietPlanFormProps> = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [loading, setLoading] = useState(false);
 
+  const navigate = useNavigate();
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -185,7 +188,7 @@ const DietPlanForm: React.FC<DietPlanFormProps> = () => {
       console.error("Error fetching diet plan:", error);
     } finally {
       setLoading(false);
-      window.location.reload();
+      navigate('/planner');
     }
   };
 
