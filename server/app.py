@@ -5,7 +5,14 @@ from flask import Flask, Response, jsonify, request
 from flask_cors import CORS 
 from langchain_google_genai import ChatGoogleGenerativeAI, HarmBlockThreshold, HarmCategory
 
-os.environ["GOOGLE_API_KEY"] = "AIzaSyCLVFGlzlD38y9oiMSlKCm1hUuA-Ln_RT8"
+from dotenv import load_dotenv
+load_dotenv()
+
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+
+if not GOOGLE_API_KEY:
+    raise ValueError("GOOGLE_API_KEY environment variable is not set")
+
 
 app = Flask(__name__)
 CORS(app)
@@ -20,6 +27,10 @@ llm = ChatGoogleGenerativeAI(
         HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
     },
 )
+
+@app.route("/ping", methods=["GET"])
+def ping():
+    return jsonify({"message": "pong"}), 200
 
 @app.route('/diet_plan', methods=['GET'])
 def get_diet_plan():
