@@ -1,7 +1,7 @@
 .layout-container{
   display: flex;
   height: 100vh;
-  background: url('./bg-pattern.png');
+  background: url('../assets/images/');
 }
 
 .sidebar {
