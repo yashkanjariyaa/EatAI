@@ -41,7 +41,7 @@ const UpdateDish: React.FC<UpdateDishProps> = ({
 
       try {
         const response = await axios.post(
-          "http://localhost:5000/update_diet_plan",
+          `${import.meta.env.VITE_SERVER_BASE_URL}/update_diet_plan`,
           payload
         );
         localStorage.setItem("dietPlan", JSON.stringify(response.data));

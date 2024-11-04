@@ -3,7 +3,7 @@ import "./chat.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowUp } from "@fortawesome/free-solid-svg-icons";
 import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm"; 
+import remarkGfm from "remark-gfm";
 
 interface Message {
   id: string;
@@ -37,7 +37,10 @@ const ChatInterface: React.FC = () => {
               { ...lastMessage, text: lastMessage.text + message },
             ];
           } else {
-            return [...prev, { id: `bot-${Date.now()}`, text: message, sender: "bot" }];
+            return [
+              ...prev,
+              { id: `bot-${Date.now()}`, text: message, sender: "bot" },
+            ];
           }
         });
       }
@@ -61,7 +64,7 @@ const ChatInterface: React.FC = () => {
       setIsBotTyping(true);
 
       try {
-        await fetch("http://localhost:5000/chat", {
+        await fetch(`${import.meta.env.VITE_SERVER_BASE_URL}/chat`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -69,7 +72,9 @@ const ChatInterface: React.FC = () => {
           body: JSON.stringify({ message: input }),
         });
 
-        const eventSource = new EventSource("http://localhost:5000/chat");
+        const eventSource = new EventSource(
+          `${import.meta.env.VITE_SERVER_BASE_URL}/chat`
+        );
         handleEventSource(eventSource);
       } catch (error) {
         console.error("Failed to send message: ", error);
@@ -102,7 +107,9 @@ const ChatInterface: React.FC = () => {
         <div className="chat-messages">
           {messages.map((message) => (
             <div key={message.id} className={`chat-message ${message.sender}`}>
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {message.text}
+              </ReactMarkdown>
             </div>
           ))}
         </div>

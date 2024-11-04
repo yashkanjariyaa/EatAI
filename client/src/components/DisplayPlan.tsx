@@ -77,7 +77,7 @@ const DietPlan: React.FC = () => {
     setLoading(true);
     try {
       const response = await axios.get(
-        `http://localhost:5000/get-recipe?dish_name=${encodeURIComponent(item)}`
+        `${import.meta.env.VITE_SERVER_BASE_URL}/get-recipe?dish_name=${encodeURIComponent(item)}`
       );
       localStorage.setItem("recipe", JSON.stringify(response.data));
     } catch (error) {

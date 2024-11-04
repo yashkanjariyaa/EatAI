@@ -29,7 +29,9 @@ const Recipes = () => {
       setLoading(true);
       try {
         const response = await axios.get(
-          `http://localhost:5000/get-ingredient-info?ingredient_name=${ingredientName}`
+          `${
+            import.meta.env.VITE_SERVER_BASE_URL
+          }/get-ingredient-info?ingredient_name=${ingredientName}`
         );
         const data = response.data;
         setIngredientInfo((prev) => ({ ...prev, [ingredientName]: data }));
@@ -64,7 +66,9 @@ const Recipes = () => {
     setLoading(true);
     try {
       const response = await axios.get(
-        `http://localhost:5000/get-recipe?dish_name=${encodeURIComponent(item)}`
+        `${
+          import.meta.env.VITE_SERVER_BASE_URL
+        }/get-recipe?dish_name=${encodeURIComponent(item)}`
       );
       localStorage.setItem("recipe", JSON.stringify(response.data));
       setRecipe(response.data);
