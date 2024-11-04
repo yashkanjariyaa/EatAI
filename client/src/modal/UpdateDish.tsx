@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import "./UpdateDish.css";
+import "./updatedish.css";
 
 interface UpdateDishProps {
   isOpen: boolean;
