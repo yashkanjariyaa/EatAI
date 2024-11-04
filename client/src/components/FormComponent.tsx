@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 import "./DietPlanForm.css";
+import LoadingModal from "../modal/LoadingModal";
+
 const questions = [
   {
     label: "What shall I call you?",
@@ -131,9 +133,14 @@ const questions = [
   },
 ];
 
-const DietPlanForm: React.FC = () => {
+interface DietPlanFormProps {
+  refresh: () => void;
+}
+
+const DietPlanForm: React.FC<DietPlanFormProps> = () => {
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -144,7 +151,6 @@ const DietPlanForm: React.FC = () => {
     const selectedOptions = (e.target as HTMLSelectElement).selectedOptions;
 
     if (type === "select-multiple") {
-      // If it's a multiple select, we need to collect selected options
       const values = Array.from(selectedOptions).map((option) => option.value);
       setFormData({
         ...formData,
@@ -168,6 +174,7 @@ const DietPlanForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const response = await axios.get("http://127.0.0.1:5000/diet_plan", {
         params: formData,
@@ -176,6 +183,9 @@ const DietPlanForm: React.FC = () => {
       localStorage.setItem("dietPlan", JSON.stringify(response.data));
     } catch (error) {
       console.error("Error fetching diet plan:", error);
+    } finally {
+      setLoading(false);
+      window.location.reload();
     }
   };
 
@@ -184,8 +194,7 @@ const DietPlanForm: React.FC = () => {
   return (
     <div>
       <form className="diet-plan-form" onSubmit={handleSubmit}>
-
-        {/* Question Display */}
+        {loading && <LoadingModal />}
         <div className="form-group">
           <label>{currentQuestion.label}</label>
           {currentQuestion.type === "select" ? (

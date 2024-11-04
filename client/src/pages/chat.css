@@ -14,31 +14,37 @@
   padding: 10px;
   overflow-y: auto;
   background-color: transparent;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  font-size: 1.5rem;
+  overflow-y: scroll;
+}
+
+.chat-messages::-webkit-scrollbar {
+  background-color: transparent;
 }
 
 .chat-message {
-  max-width: 80%;
+  max-width: max-content;
   padding: 10px;
   margin: 5px 0;
   border-radius: 8px;
-  font-size: 14px;
   line-height: 1.4;
   word-wrap: break-word;
 }
 
 .chat-message.user {
-  align-self: flex-end;
+  align-self: flex-end; /* Align user messages to the right */
   background: transparent;
-  color: #333;
 }
 
 .chat-message.bot {
-  align-self: flex-start;
+  align-self: flex-start; /* Align bot messages to the left */
   background: transparent;
-  color: #333;
 }
 
-.chat-messages .chat-placeholder {
+.chat-placeholder {
   height: 100%;
   width: 100%;
   display: flex;
@@ -49,7 +55,7 @@
   color: #fff;
 }
 
-.chat-messages .chat-placeholder .prompts {
+.chat-placeholder .prompts {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -59,12 +65,12 @@
   margin: 1rem 0;
 }
 
-.chat-messages .chat-placeholder .prompts .prompt{
-    padding: 1rem 2rem;
-    border-radius: 3rem;
-    background-color: #4caf50;
-    color: #ffffff;
-    cursor: pointer;
+.chat-placeholder .prompts .prompt {
+  padding: 1rem 2rem;
+  border-radius: 3rem;
+  background-color: #4caf50;
+  color: #ffffff;
+  cursor: pointer;
 }
 
 .chat-input-container {
@@ -77,6 +83,7 @@
   width: 100%;
   background-color: #1f1f1f;
 }
+
 .chat-input-container input {
   flex: 1;
   padding: 1rem 2rem;
@@ -101,4 +108,15 @@
 
 .chat-input-container button:hover {
   background-color: #45a049;
+}
+
+/* Additional CSS to ensure proper layout */
+.chat-message.user {
+  background-color: #4caf50; /* Optional: Add a different background color for user messages */
+  color: white; /* Change text color to improve contrast */
+}
+
+.chat-message.bot {
+  background-color: #333; /* Optional: Add a different background color for bot messages */
+  color: white; /* Change text color to improve contrast */
 }

@@ -3,6 +3,10 @@ import React, { useEffect, useRef, useState } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import axios from "axios";
+import UpdateDish from "../modal/UpdateDish";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faRedo } from "@fortawesome/free-solid-svg-icons";
+import LoadingModal from "../modal/LoadingModal";
 
 interface Meal {
   name: string;
@@ -17,6 +21,10 @@ interface DietPlanProps {
 
 const DietPlan: React.FC = () => {
   const [dietPlan, setDietPlan] = useState<DietPlanProps | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDish, setSelectedDish] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
   const componentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -66,15 +74,27 @@ const DietPlan: React.FC = () => {
   };
 
   const fetchRecipe = async (item: string) => {
+    setLoading(true);
     try {
       const response = await axios.get(
         `http://localhost:5000/get-recipe?dish_name=${encodeURIComponent(item)}`
       );
       localStorage.setItem("recipe", JSON.stringify(response.data));
-      window.location.href = "/recipes";
     } catch (error) {
       console.error("Failed to fetch recipe:", error);
+    }finally{
+      setLoading(false);
+      window.location.href = "/recipes";
     }
+  };
+
+  const openModal = (dish: string) => {
+    setSelectedDish(dish);
+    setIsModalOpen(true);
+  };
+
+  const handleModalSubmit = (message: string) => {
+    console.log(`Message for ${selectedDish}: ${message}`);
   };
 
   if (!dietPlan || !dietPlan.meals) {
@@ -83,6 +103,13 @@ const DietPlan: React.FC = () => {
 
   return (
     <div className="diet-plan-container">
+      <UpdateDish
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        dishName={selectedDish || ""}
+        onSubmit={handleModalSubmit}
+      />
+      {loading && <LoadingModal />}
       <div className="diet-plan" ref={componentRef}>
         <h2>Daily Diet Plan</h2>
         <div className="total-calories">
@@ -102,7 +129,7 @@ const DietPlan: React.FC = () => {
                   {meal.items.map((item, i) => (
                     <li key={i} className="meal-item">
                       <span
-                        onClick={() => fetchRecipe(item)}
+                        onClick={() => fetchRecipe(item)} // Keep fetchRecipe as is
                         className="fetch-recipe-link"
                         style={{
                           cursor: "pointer",
@@ -111,6 +138,12 @@ const DietPlan: React.FC = () => {
                       >
                         {item}
                       </span>
+                      <div
+                        className="update-button"
+                        onClick={() => openModal(item)}
+                      >
+                        <FontAwesomeIcon icon={faRedo} />
+                      </div>{" "}
                     </li>
                   ))}
                 </ul>
@@ -118,8 +151,8 @@ const DietPlan: React.FC = () => {
             </div>
           ))}
         </div>
+        <button onClick={handleDownloadPDF}>Download PDF</button>
       </div>
-      <button onClick={handleDownloadPDF}>Download PDF</button>
     </div>
   );
 };

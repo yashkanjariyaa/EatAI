@@ -2,99 +2,101 @@ import "./recipe.css";
 import { useEffect, useState, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUtensils } from "@fortawesome/free-solid-svg-icons";
-
-interface Ingredient {
-  name: string;
-  quantity: string;
-}
-
-interface Recipe {
-  name: string;
-  calories: string;
-  cook_time: string;
-  prep_time: string;
-  total_time: string;
-  servings: string;
-  ingredients: Ingredient[];
-  instructions: string[];
-}
-
-interface IngredientInfo {
-  availability: string;
-  calories: string;
-  dietary_restrictions: string[];
-  health_benefits: string[];
-  macronutrients: {
-    carbs: string;
-    fats: string;
-    proteins: string;
-  };
-  micronutrients: { name: string; amount: string }[];
-  suitable_for_diets: string[];
-}
+import NutrientInfoModal from "../modal/IngredientInfo";
+import LoadingModal from "../modal/LoadingModal";
+import axios from "axios";
 
 const Recipes = () => {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [ingredientInfo, setIngredientInfo] = useState<{
     [key: string]: IngredientInfo | null;
   }>({});
-  const [visibleInfo, setVisibleInfo] = useState<{ [key: string]: boolean }>(
-    {}
-  );
+  const [modalData, setModalData] = useState<IngredientInfo | null>(null);
+  const [loading, setLoading] = useState(false); // Loading state
 
-  // Reference for detecting clicks outside the dropdown
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const savedRecipe = localStorage.getItem("recipe");
-    if (savedRecipe) {
-      setRecipe(JSON.parse(savedRecipe));
-    }
-
-    const handleEscKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setVisibleInfo({});
-      }
-    };
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setVisibleInfo({});
-      }
-    };
-
-    document.addEventListener("keydown", handleEscKey);
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("keydown", handleEscKey);
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    setRecipe(
+      localStorage.getItem("recipe")
+        ? JSON.parse(localStorage.getItem("recipe")!)
+        : null
+    );
   }, []);
 
   const fetchIngredientInfo = async (ingredientName: string) => {
     if (!ingredientInfo[ingredientName]) {
+      setLoading(true);
       try {
-        const response = await fetch(
+        const response = await axios.get(
           `http://localhost:5000/get-ingredient-info?ingredient_name=${ingredientName}`
         );
-        const data = await response.json();
+        const data = response.data;
         setIngredientInfo((prev) => ({ ...prev, [ingredientName]: data }));
+        setModalData(data);
       } catch (error) {
         console.error("Error fetching ingredient info:", error);
+      } finally {
+        setLoading(false);
       }
+    } else {
+      setModalData(ingredientInfo[ingredientName]);
     }
-    setVisibleInfo((prev) => ({
-      ...prev,
-      [ingredientName]: !prev[ingredientName],
-    }));
   };
 
+  const closeModal = () => {
+    setModalData(null); // Close modal by clearing modal data
+  };
+
+  const handleClickOutside = (event: MouseEvent) => {
+    if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+      closeModal();
+    }
+  };
+
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (event.key === "Escape") {
+      closeModal();
+    }
+  };
+
+  const fetchRecipe = async (item: string) => {
+    setLoading(true);
+    try {
+      const response = await axios.get(
+        `http://localhost:5000/get-recipe?dish_name=${encodeURIComponent(item)}`
+      );
+      localStorage.setItem("recipe", JSON.stringify(response.data));
+      setRecipe(response.data);
+    } catch (error) {
+      console.error("Failed to fetch recipe:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRecommendationClick = (dishName: string) => {
+    fetchRecipe(dishName);
+  };
+
+  useEffect(() => {
+    if (modalData) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleKeyDown);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [modalData]);
+
   return (
-    <div className={`recipe-container ${Object.values(visibleInfo).includes(true) ? 'dark-background' : ''}`}>
+    <div className="recipe-container">
+      {loading && <LoadingModal />}
       <h1>Recipes</h1>
       {recipe ? (
         <div className="recipe-details">
@@ -124,71 +126,6 @@ const Recipes = () => {
                       }}
                     >
                       {ingredient.quantity} - {ingredient.name}
-                      {visibleInfo[ingredient.name] &&
-                        ingredientInfo[ingredient.name] && (
-                          <div
-                            className="ingredient-info-dropdown"
-                            ref={dropdownRef}
-                          >
-                            <strong>Availability:</strong>{" "}
-                            {ingredientInfo[ingredient.name]?.availability}
-                            <br />
-                            <strong>Calories:</strong>{" "}
-                            {ingredientInfo[ingredient.name]?.calories}
-                            <br />
-                            <strong>Macronutrients:</strong>
-                            <ul>
-                              <li>
-                                Carbs:{" "}
-                                {
-                                  ingredientInfo[ingredient.name]
-                                    ?.macronutrients.carbs
-                                }
-                              </li>
-                              <li>
-                                Fats:{" "}
-                                {
-                                  ingredientInfo[ingredient.name]
-                                    ?.macronutrients.fats
-                                }
-                              </li>
-                              <li>
-                                Proteins:{" "}
-                                {
-                                  ingredientInfo[ingredient.name]
-                                    ?.macronutrients.proteins
-                                }
-                              </li>
-                            </ul>
-                            <strong>Micronutrients:</strong>
-                            <ul>
-                              {ingredientInfo[
-                                ingredient.name
-                              ]?.micronutrients.map((nutrient, idx) => (
-                                <li key={idx}>
-                                  {nutrient.name}: {nutrient.amount}
-                                </li>
-                              ))}
-                            </ul>
-                            <strong>Health Benefits:</strong>
-                            <ul>
-                              {ingredientInfo[
-                                ingredient.name
-                              ]?.health_benefits.map((benefit, idx) => (
-                                <li key={idx}>{benefit}</li>
-                              ))}
-                            </ul>
-                            <strong>Dietary Restrictions:</strong>{" "}
-                            {ingredientInfo[
-                              ingredient.name
-                            ]?.dietary_restrictions.join(", ")}
-                            <br />
-                            <strong>Suitable for Diets:</strong>{" "}
-                            {ingredientInfo[
-                              ingredient.name
-                            ]?.suitable_for_diets.join(", ")}
-                          </div>
-                        )}
                     </li>
                   ))}
                 </ul>
@@ -208,7 +145,10 @@ const Recipes = () => {
         <div className="recommendations-container">
           <div className="title">Recommendations based on your Queries ✨</div>
           <div className="recommendations">
-            <div className="recommendation">
+            <div
+              className="recommendation"
+              onClick={() => handleRecommendationClick("Falafel Bowl")}
+            >
               <div className="title">
                 Falafel Bowl <FontAwesomeIcon icon={faUtensils} />
               </div>
@@ -222,7 +162,10 @@ const Recipes = () => {
                 </div>
               </div>
             </div>
-            <div className="recommendation">
+            <div
+              className="recommendation"
+              onClick={() => handleRecommendationClick("Grilled Cheese")}
+            >
               <div className="title">
                 Grilled Cheese <FontAwesomeIcon icon={faUtensils} />
               </div>
@@ -238,6 +181,15 @@ const Recipes = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {modalData && (
+        <NutrientInfoModal
+          ref={modalRef}
+          data={modalData}
+          onClose={closeModal}
+          isOpen={!!modalData}
+        />
       )}
     </div>
   );

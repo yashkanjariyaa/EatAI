@@ -47,7 +47,7 @@ const Home = () => {
           <button onClick={() => navigate("/planner")}>
             Meal Planner
           </button>
-          <button>Recipes</button>
+          <button onClick={() => navigate("/recipes")}>Recipes</button>
         </div>
         <div className="bottom">
           <div className="content">

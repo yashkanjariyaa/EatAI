@@ -6,11 +6,12 @@ interface IngredientInfo {
   dietary_restrictions: string[];
   health_benefits: string[];
   macronutrients: {
-    carbs: string;
-    fats: string;
-    proteins: string;
+      carbs: string;
+      fats: string;
+      proteins: string;
   };
   micronutrients: { name: string; amount: string }[];
+  name: string;
   suitable_for_diets: string[];
 }
 
@@ -24,3 +25,10 @@ interface Recipe {
   ingredients: Ingredient[];
   instructions: string[];
 }
+
+
+interface Ingredient {
+  name: string;
+  quantity: string;
+}
+

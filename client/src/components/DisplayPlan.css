@@ -1,5 +1,6 @@
 .diet-plan-container {
   width: 80%;
+  height: 70vh;
 }
 
 .diet-plan {
@@ -12,6 +13,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
+  height: 100%;
 }
 
 .diet-plan h2 {
@@ -19,15 +21,21 @@
   color: white;
 }
 
-.diet-plan .total-calories{
+.diet-plan .total-calories {
   font-size: 1.5rem;
 }
 
 .meals {
-  margin-top: 20px;
+  margin: 20px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-gap: 20px;
+  overflow-y: scroll;
+  height: 85%;
+}
+
+.meals::-webkit-scrollbar {
+  display: none;
 }
 
 .meal {
@@ -41,11 +49,25 @@
   align-items: center;
 }
 
-.meal-items{
+.meal-items {
   width: 80%;
   margin-top: 20px;
 }
 
 .meal-items ul {
   padding-left: 20px;
+}
+
+.meal-item {
+  display: flex;
+  flex-direction: row;
+  align-items: start;
+  justify-content: start;
+}
+
+.update-button {
+  background-color: transparent;
+  font-size: 1re;
+  color: white;
+  cursor: pointer;
 }

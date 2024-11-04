@@ -1,0 +1,5 @@
+Flask==2.3.3
+flask-cors==3.0.10
+os
+json
+langchain-google-genai==0.1.0  

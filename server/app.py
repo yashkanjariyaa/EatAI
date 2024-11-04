@@ -1,6 +1,7 @@
 import os
+import re
 import json 
-from flask import Flask, jsonify, request
+from flask import Flask, Response, jsonify, request
 from flask_cors import CORS 
 from langchain_google_genai import ChatGoogleGenerativeAI, HarmBlockThreshold, HarmCategory
 
@@ -44,7 +45,7 @@ def get_diet_plan():
         f"My name is {name}, a {age}-year-old {gender}. I follow a strictly {dietary_preferences} diet. My health goal is {health_goals}. "
         f"I have a medical history of {', '.join(medical_history) if medical_history else 'no specific conditions'}. "
         f"My current weight is {weight} kg, height is {height} cm, and body fat percentage is "
-        f"{body_fat_percentage if body_fat_percentage else "not specified."}%." 
+        f"{body_fat_percentage if body_fat_percentage else 'not specified.'}%." 
         f"My activity level is {activity_level} "
         f"I prefer {meal_frequency} meals a day and have a {budget} budget. I drink about {hydration} L of water daily, "
         f"and I currently take supplements: {', '.join(supplements) if supplements else 'none'}. "
@@ -63,7 +64,7 @@ def get_diet_plan():
             f"}},\n"
         )
 
-    message = f"""You are a Diet Assist AI that helps users create an Indian diet plan according to the user's information
+    message = f"""You are a Diet Assist AI that helps users create an Indian diet plan containing Indian dishes according to the user's information
     
     User's Information : {request_string}
     
@@ -87,6 +88,46 @@ def get_diet_plan():
         return jsonify(json.loads(content))
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+
+@app.route('/update_diet_plan', methods=['POST'])
+def update_diet_plan():
+    data = request.get_json()
+
+    dish_to_update = data.get('dish_to_update')
+    diet_plan = data.get('diet_plan')
+    update_message = data.get('update_message')
+
+    if not dish_to_update or not diet_plan or not update_message:
+        return jsonify({"error": "Missing required fields."}), 400
+
+    # Find the meal that contains the dish to update
+    meal_found = False
+    updated_dishes = []
+
+    for meal in diet_plan.get('meals', []):
+        if dish_to_update in meal.get('dishes', []):
+            meal_found = True
+            
+            llm_message = (
+                f"I need to update the dish '{dish_to_update}' in the diet plan. "
+                f"The current diet plan is: {diet_plan}. "
+                f"Here is the update note: {update_message}. "
+                f"Please suggest a suitable replacement for the dish. Don't give any extra information, just the dish name."
+            )
+
+            ai_response = llm.invoke(llm_message)
+            new_dish = ai_response.content.strip()
+            new_dish = re.sub(r'[^a-zA-Z\s]', '', new_dish).strip()
+
+            updated_dishes = [new_dish if dish == dish_to_update else dish for dish in meal['dishes']]
+            meal['dishes'] = updated_dishes
+            break
+
+    if not meal_found:
+        return jsonify({"error": f"Dish '{dish_to_update}' not found in diet plan."}), 404
+
+    return jsonify(diet_plan), 200
     
     
 @app.route('/get-recipe', methods=['GET'])
@@ -182,7 +223,31 @@ def get_ingredient_info():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route("/chat", methods=["POST", "GET"])
+def chat():
+    global user_message
+
+    # Handle POST request for sending user message
+    if request.method == "POST":
+        data = request.get_json()
+        user_message = data.get("message")
+        return jsonify({"status": "Message received"})
+
+    # Handle GET request for EventSource streaming
+    elif request.method == "GET":
+        def generate_response():
+            for chunk in llm_stream_response(user_message):
+                yield f"data: {chunk.content}\n\n"
+            yield "data: [END]\n\n"
+        
+        return Response(generate_response(), mimetype="text/event-stream")
+
+def llm_stream_response(message):
+    """Stream the response from LLM in chunks for EventSource."""
     
+    for chunk in llm.stream(message):
+        yield chunk
+
 
 if __name__ == '__main__':
     app.run(debug=True)
