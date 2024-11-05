@@ -179,16 +179,19 @@ const DietPlanForm: React.FC<DietPlanFormProps> = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.get(`${import.meta.env.VITE_SERVER_BASE_URL}/diet_plan`, {
-        params: formData,
-      });
+      const response = await axios.get(
+        `${import.meta.env.VITE_SERVER_BASE_URL}/diet_plan`,
+        {
+          params: formData,
+        }
+      );
       console.log(response.data);
       localStorage.setItem("dietPlan", JSON.stringify(response.data));
     } catch (error) {
       console.error("Error fetching diet plan:", error);
     } finally {
       setLoading(false);
-      navigate('/planner');
+      window.location.reload();
     }
   };
 
