@@ -53,23 +53,40 @@ const ChatInterface: React.FC = () => {
     };
   };
 
-  const sendMessage = async () => {
-    if (input.trim()) {
-      setCurrentUserMessage(input);
+  const sendMessage = async (messageToSend?: string) => {
+    const message = messageToSend || input.trim();
+    if (message) {
+      setCurrentUserMessage(message);
       setMessages((prev) => [
         ...prev,
-        { id: `user-${Date.now()}`, text: input, sender: "user" },
+        { id: `user-${Date.now()}`, text: message, sender: "user" },
       ]);
+      localStorage.setItem(
+        "messages",
+        JSON.stringify({
+          messages: [
+            ...messages,
+            { id: `user-${Date.now()}`, text: message, sender: "user" },
+          ],
+        })
+      );
       setInput("");
       setIsBotTyping(true);
 
       try {
+        const payload = {
+          conversation: [
+            ...messages,
+            { id: `user-${Date.now()}`, text: message, sender: "user" },
+          ],
+        };
+
         await fetch(`${import.meta.env.VITE_SERVER_BASE_URL}/chat`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ message: input }),
+          body: JSON.stringify(payload),
         });
 
         const eventSource = new EventSource(
@@ -81,6 +98,12 @@ const ChatInterface: React.FC = () => {
         setIsBotTyping(false);
       }
     }
+  };
+
+  const handleAutoPrompt = (e: any, prompt: string) => {
+    e.preventDefault();
+    setInput(prompt);
+    sendMessage(prompt);
   };
 
   const handleInput = (e: ChangeEvent<HTMLInputElement>) =>
@@ -98,9 +121,24 @@ const ChatInterface: React.FC = () => {
             Got a question about your diet, health tips, or recipe ideas?
           </div>
           <div className="prompts">
-            <div className="prompt">5min Recipes</div>
-            <div className="prompt">Nutrients comparison</div>
-            <div className="prompt">Diet plan</div>
+            <button
+              className="prompt"
+              onClick={(e) => handleAutoPrompt(e, "A 5 min Healthy Recipe")}
+            >
+              5min Recipes
+            </button>
+            <button
+              className="prompt"
+              onClick={(e) => handleAutoPrompt(e, "Essential Nutrients")}
+            >
+              Essential Nutrients
+            </button>
+            <button
+              className="prompt"
+              onClick={(e) => handleAutoPrompt(e, "Quick Health Snacks")}
+            >
+              Quick Healthy Snacks
+            </button>
           </div>
         </div>
       ) : (
@@ -124,7 +162,7 @@ const ChatInterface: React.FC = () => {
           placeholder="Type a message..."
           aria-label="Type a message"
         />
-        <button onClick={sendMessage} aria-label="Send message">
+        <button onClick={() => sendMessage()} aria-label="Send message">
           <FontAwesomeIcon icon={faArrowUp} />
         </button>
       </div>

@@ -236,18 +236,27 @@ def get_ingredient_info():
 
 @app.route("/chat", methods=["POST", "GET"])
 def chat():
-    global user_message
+    global conversation_history  # Store conversation history
+    
+    # Initialize conversation history if not already
+    if 'conversation_history' not in globals():
+        conversation_history = []
 
     # Handle POST request for sending user message
     if request.method == "POST":
         data = request.get_json()
-        user_message = data.get("message")
-        return jsonify({"status": "Message received"})
+        new_message = data.get("conversation", [])
+        conversation_history = new_message  # Update conversation history
+        return jsonify({"status": "Conversation received"})
 
     # Handle GET request for EventSource streaming
     elif request.method == "GET":
         def generate_response():
-            for chunk in llm_stream_response(user_message):
+            # Combine all messages in the conversation as input for the model
+            context = "\n".join(
+                f"{msg['sender']}: {msg['text']}" for msg in conversation_history
+            )
+            for chunk in llm_stream_response(context):
                 yield f"data: {chunk.content}\n\n"
             yield "data: [END]\n\n"
         
